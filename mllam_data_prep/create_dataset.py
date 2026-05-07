@@ -301,7 +301,7 @@ def create_dataset(config: Config):
         for split_name, split_config in splits.items():
             if split_config.compute_statistics is not None:
                 ds_split = ds.sel(
-                    {splitting.dim: slice(split_config.start, split_config.end)}
+                    {splitting.dim: slice(int(split_config.start), int(split_config.end))}
                 )
                 logger.info(f"Computing statistics for split {split_name}")
                 split_stats = calc_stats(
@@ -315,7 +315,7 @@ def create_dataset(config: Config):
 
         # add a new variable which contains the start, stop for each split, the coords would then be the split names
         # and the data would be the start, stop values
-        split_vals = np.array([[split.start, split.end] for split in splits.values()])
+        split_vals = np.array([[int(split.start), int(split.end)] for split in splits.values()])
         da_splits = xr.DataArray(
             split_vals,
             dims=["split_name", "split_part"],
