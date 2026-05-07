@@ -44,7 +44,7 @@ SUPPORTED_CONFIG_VERSIONS = ["v0.2.0", "v0.5.0", "v0.6.0"]
 def _check_dataset_attributes(ds, expected_attributes, dataset_name):
     # check that the dataset has the expected attributes with the expected values
     missing_attributes = set(expected_attributes.keys()) - set(ds.attrs.keys())
-    if len(missing_attributes) > 0:
+    if len(missing_attributes) > 0: 
         raise ValueError(
             f"Dataset {dataset_name} is missing the following attributes: {missing_attributes}"
         )
@@ -276,6 +276,20 @@ def create_dataset(config: Config):
     ds = chunk_dataset(ds, chunks)
 
     splitting = config.output.splitting
+
+    if splitting is not None and splitting.dim in ds.dims:
+        starts = [int(split.start) for split in splitting.splits.values()]
+        ends = [int(split.end) for split in splitting.splits.values()]
+
+        keep_start = min(starts)
+        keep_end = max(ends)
+
+        logger.info(
+            f"Subsetting {splitting.dim} to only needed range: "
+            f"{keep_start} to {keep_end}"
+        )
+
+        ds = ds.sel({splitting.dim: slice(keep_start, keep_end)})
 
     if splitting is not None:
         splits = splitting.splits
