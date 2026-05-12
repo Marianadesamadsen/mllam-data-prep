@@ -38,16 +38,18 @@ def calc_stats(
             op = op_split
             pre_op = None
 
+        ds_for_op = ds
+
         if pre_op is not None:
             if pre_op == "diff":
                 splitting_dim_temp = "time"
                 # subset to select only the variable which have the splitting_dim
                 vars_to_keep = [v for v in ds.data_vars if splitting_dim_temp in ds[v].dims]
-                ds = ds[vars_to_keep].diff(dim=splitting_dim_temp)
+                ds_for_op = ds[vars_to_keep].diff(dim=splitting_dim_temp)
             else:
                 raise NotImplementedError(pre_op)
 
-        fn = getattr(ds, op)
+        fn = getattr(ds_for_op, op)
         stats[op_split] = fn(dim=statistics_config.dims)
 
     return stats
